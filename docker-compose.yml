@@ -1,0 +1,59 @@
+version: "3.2"
+services:
+  # grafana:
+  #   build: grafana
+  #   env_file: configuration.env
+  #   links:
+  #     - influxdb
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - grafana_data:/var/lib/grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana-provisioning/:/etc/grafana/provisioning/
+    depends_on:
+      - influxdb
+    environment:
+      - GF_SECURITY_ADMIN_USER=uwfe
+      - GF_SECURITY_ADMIN_PASSWORD=uwfepassword
+      - DOCKER_INFLUXDB_INIT_ORG=uwfe
+      - DOCKER_INFLUXDB_INIT_BUCKET=telemetry
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secrettoken
+
+  monitor:
+    build: ./monitor
+    container_name: uwfe_monitor
+    restart: always
+
+  # influxdb:
+  #   build: influxdb
+  #   env_file: configuration.env
+  #   ports:
+  #     - "8086:8086"
+  #   volumes:
+  #     - influxdb_data:/var/lib/influxdb
+  influxdb:
+    image: influxdb:2-alpine
+    volumes:
+      - influxdbv2:/.influxdbv2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=uwfe
+      - DOCKER_INFLUXDB_INIT_PASSWORD=uwfepassword
+      - DOCKER_INFLUXDB_INIT_ORG=uwfe
+      - DOCKER_INFLUXDB_INIT_BUCKET=telemetry
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secrettoken
+      - INFLUXDB_HTTP_HTTPS_ENABLED=true
+
+    ports:
+      - "8086:8086"
+
+volumes:
+  influxdbv2:
+  grafana-storage:
+  # influxdb_data: {}
