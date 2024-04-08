@@ -6,10 +6,10 @@ import time
 if __name__ == '__main__':
     start = Monitor(TCP_HOST, TCP_PORT, DBC_PATH)
 
-    for i in range(5):
-        print("Buffer time... loading...")
+    for i in range(3):
+        print("Buffer time...")
         time.sleep(1)
+        
     start.simulate_telemetry(LOG_PATH)
-    # mock_write()
 
 
