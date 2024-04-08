@@ -3,6 +3,7 @@ from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 from config import INFLUX_URL, INFLUX_BUCKET, INFLUX_TOKEN, INFLUX_ORG
+from can_data import Signal
 
 token = INFLUX_TOKEN
 org = INFLUX_ORG
@@ -22,3 +23,17 @@ def mock_write():
         write_api.write(bucket=bucket, org=INFLUX_ORG, record=point)
         print('wrote: ', value)
         time.sleep(1) # separate points by 1 second
+
+def write_signal(signal: Signal):
+    try:
+      point = (Point(signal.msg_name)\
+        .tag("sender", signal.sender)\
+        .tag("signal_name", signal.signal_name)\
+        .field("value", float(signal.value)))
+       # .time(signal.timestamp)
+
+      write_api.write(bucket=bucket, org=INFLUX_ORG, record=point)
+      print(signal)
+    except Exception as e:
+      print(e)
+        

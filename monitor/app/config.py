@@ -6,7 +6,10 @@ import os
 
 # Core
 TCP_HOST = "208.68.36.87"
-TCP_PORT = "2333"
+TCP_PORT = 2333
+
+# DBC
+DBC_PATH = './data/dbc/2018CAR.dbc'
 
 # Dummy Logs
 LOG_PATH = './data/sept3_2022_log.csv' 

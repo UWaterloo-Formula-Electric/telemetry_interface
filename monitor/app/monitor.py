@@ -6,11 +6,14 @@ import socket
 import json
 import time
 from datetime import datetime
+from can_data import Signal, DBC
+from influx_writer import write_signal
 
 class Monitor:
-    def __init__(self, server_address: str, server_port: int):
+    def __init__(self, server_address: str, server_port: int, dbc_path: str):
         self.server_address: str = server_address
         self.server_port: int = server_port
+        self.dbc: DBC = DBC(dbc_path)
 
     def read_tcp(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -69,8 +72,61 @@ class Monitor:
 
                     value = convert_value(value)
 
-                    print(f"Timestamp: {timestamp:.6f}, Signal Name: {signal_name}, Value: {value}")
+                    signal = Signal(signal_name, value, timestamp, self.dbc)
+                    write_signal(signal)
+
 
             # After finishing each loop through the file, update the total_offset
             # This offset will be applied to timestamps in the next iteration
             total_offset = timestamp + (original_timestamp - initial_timestamp) - total_offset
+
+
+    def simulate_telemetry(self, log_path: str):
+        """Test method to simulate telemetry data"""
+        def convert_value(value):
+            try:
+                if '.' in value:
+                    return float(value)
+                return int(value)
+            except ValueError:
+                return value
+
+        # Get the current time
+        start_time = datetime.now().timestamp()
+
+        # Initialize variables to store the initial and last timestamps from the log file
+        initial_timestamp_log = None
+        last_timestamp_log = 0
+
+        with open(log_path, 'r') as file:
+            for line in file:
+                parts = line.strip().split(',')
+                timestamp_str, signal_name = parts[:2]
+                value = ','.join(parts[2:])
+
+                original_timestamp = float(timestamp_str)
+
+                if initial_timestamp_log is None:
+                    initial_timestamp_log = original_timestamp
+
+                # Calculate the time difference from the last log entry
+                time_difference = original_timestamp - initial_timestamp_log
+
+                # Calculate the real-time timestamp adjustment
+                adjusted_timestamp = start_time + time_difference
+
+                # Calculate the delay needed before sending the next data
+                delay = adjusted_timestamp - (start_time + last_timestamp_log)
+
+                # Wait for the time offset from the last entry before proceeding
+                if delay > 0:
+                    time.sleep(delay)
+
+                last_timestamp_log = time_difference
+
+                value = convert_value(value)
+
+                # Call the send_data function with the adjusted timestamp
+
+                signal = Signal(signal_name, value, adjusted_timestamp, self.dbc)
+                write_signal(signal)
