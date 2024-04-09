@@ -10,4 +10,4 @@ docker rm -f $(docker ps -a -q)
 docker volume rm $(docker volume ls -q)
 
 # Start up the containers in the background as per docker-compose configuration
-docker-compose up -d
+docker-compose up
