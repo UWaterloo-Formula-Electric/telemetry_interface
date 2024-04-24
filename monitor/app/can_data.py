@@ -13,6 +13,7 @@ class DBC:
     def _load_dbc(self):
         import canmatrix.formats
         dbc = canmatrix.formats.loadp_flat(self.path)
+        print(dbc)
         return dbc
 
     def _create_lookup(self):

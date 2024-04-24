@@ -5,6 +5,7 @@ Read on the TCP server for data
 import socket
 import json
 import time
+import random
 from datetime import datetime
 from can_data import Signal, DBC
 from influx_writer import write_signal
@@ -40,47 +41,6 @@ class Monitor:
                 # Sleep for a second to manage timing and avoid spamming
                 time.sleep(1)
     
-    def read_log_csv(self, log_path: str, loops: int = 1):
-        """Test method to read signals from CAN logs"""
-        def convert_value(value):
-            # Attempt to convert the value to an int, float, or leave as string
-            try:
-                if '.' in value:
-                    return float(value)
-                return int(value)
-            except ValueError:
-                return value
-
-        initial_timestamp = None
-        total_offset = 0
-
-        for _ in range(loops):
-            with open(log_path, 'r') as file:
-                for line in file:
-                    parts = line.strip().split(',')
-                    timestamp_str, signal_name = parts[:2]
-                    value = ','.join(parts[2:])
-
-                    original_timestamp = float(timestamp_str)
-
-                    if initial_timestamp is None:
-                        # Set the initial timestamp based on the first log entry
-                        initial_timestamp = original_timestamp
-
-                    # Adjust the timestamp for current line including the total offset from previous loops
-                    timestamp = original_timestamp - initial_timestamp + total_offset
-
-                    value = convert_value(value)
-
-                    signal = Signal(signal_name, value, timestamp, self.dbc)
-                    write_signal(signal)
-
-
-            # After finishing each loop through the file, update the total_offset
-            # This offset will be applied to timestamps in the next iteration
-            total_offset = timestamp + (original_timestamp - initial_timestamp) - total_offset
-
-
     def simulate_telemetry(self, log_path: str):
         """Test method to simulate telemetry data"""
         def convert_value(value):
@@ -130,3 +90,12 @@ class Monitor:
 
                 signal = Signal(signal_name, value, adjusted_timestamp, self.dbc)
                 write_signal(signal)
+
+    def simulate_random(self):
+        """Test method to simulate random telemetry data"""
+        while 1:
+            for signal_name in self.dbc.lookup.keys():
+                random_val = random.randint(0, 1000)
+                signal = Signal(signal_name, random_val, datetime.now().timestamp(), self.dbc)
+                write_signal(signal)
+            time.sleep(0.2)
