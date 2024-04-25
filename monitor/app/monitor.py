@@ -17,19 +17,7 @@ class Monitor:
         self.dbc: DBC = DBC(dbc_path)
 
     def read_tcp(self):
-        def process_message(message: str):
-            if message[:2] != "0x":
-                return 
-            else:
-                clean_hex = message[2:]
-
-                id_hex = clean_hex[:8]
-                data_hex = clean_hex[8:]
-
-                id_int = int(id_hex, 16)
-                data_int = int(data_hex, 16)
-                print("Received msg id: ", id_int, " data: ", data_int)
-
+        """Read data from the TCP server"""
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             # Connect to the server
             s.connect((self.server_address, self.server_port))
@@ -47,11 +35,41 @@ class Monitor:
                     # Extract the message up to the delimiter
                     message = buffer[:delimiter_position]
                     # Process the message
-                    process_message(message)
+                    self._process_message(message)
                     # Remove the processed message from the buffer
                     buffer = buffer[delimiter_position + len(','):]
            
     
+    def _process_message(self, message: str):
+        if message[:2] != "0x":
+            return 
+        else:
+            clean_hex = message[2:]
+
+            id_hex = clean_hex[:8]
+            data_hex = clean_hex[8:]
+
+            id_int = int(id_hex, 16)
+            data_int = int(data_hex, 16)
+            print("Received msg id: ", id_int, " data: ", data_int)
+    
+    def _process_can_message(self, message: str):
+        if message[:2] != "0x":
+            return 
+        
+        clean_hex = message[2:]
+        id_hex = clean_hex[:8]
+        data_hex = clean_hex[8:]
+        id_int = int(id_hex, 16)
+        # data_int = int(data_hex, 16)
+        msg = self.dbc.cantools_db.get_message_by_frame_id(id_int)
+        data_bytes = bytes.fromhex(data_hex)
+        decoded_signals = msg.decode(data_bytes)
+
+        for signal_name, signal_value in decoded_signals.items():
+            print(f"{signal_name}: {signal_value}")
+
+
     def simulate_telemetry(self, log_path: str):
         """Test method to simulate telemetry data"""
         def convert_value(value):

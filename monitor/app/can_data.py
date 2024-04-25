@@ -1,11 +1,13 @@
 
 from typing import Any
+import cantools
 
 class DBC:
     def __init__(self, path: str):
         self.path = path
         self.dbc = self._load_dbc()
         self.lookup = self._create_lookup()
+        self.cantools_db = cantools.database.load_file(path)
 
     def get_dbc_data(self, signal: str):
         return self.lookup[signal]
