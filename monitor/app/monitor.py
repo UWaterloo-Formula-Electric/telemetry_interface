@@ -25,21 +25,7 @@ class Monitor:
             while True:
                 # Receive message from the server
                 data = s.recv(1024)
-                print(data)
-                if not data:
-                    # No more data from server, can happen if the server closes the connection
-                    print("Disconnected from server")
-                    break
-
-                # Assuming the message is in JSON format
-
-                # data = data.decode().replace("'", '"')
-                # message = json.loads(data)
-                # print("Received JSON message: %s", message)
-
-                
-                # Sleep for a second to manage timing and avoid spamming
-                time.sleep(1)
+           
     
     def simulate_telemetry(self, log_path: str):
         """Test method to simulate telemetry data"""

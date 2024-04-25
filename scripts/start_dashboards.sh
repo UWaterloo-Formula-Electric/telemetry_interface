@@ -1,10 +1,10 @@
 #!/bin/bash
 
-docker-compose down
+# docker-compose down
 
-docker rm -f $(docker ps -a -q)
+# docker rm -f $(docker ps -a -q)
 
-docker volume rm $(docker volume ls -q)
+# docker volume rm $(docker volume ls -q)
 
 docker compose build 
 
