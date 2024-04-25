@@ -11,5 +11,6 @@ if __name__ == '__main__':
         time.sleep(1)
         
     start.simulate_random()
+    # start.read_tcp()
 
 

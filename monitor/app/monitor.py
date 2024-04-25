@@ -17,14 +17,39 @@ class Monitor:
         self.dbc: DBC = DBC(dbc_path)
 
     def read_tcp(self):
+        def process_message(message: str):
+            if message[:2] != "0x":
+                return 
+            else:
+                clean_hex = message[2:]
+
+                id_hex = clean_hex[:8]
+                data_hex = clean_hex[8:]
+
+                id_int = int(id_hex, 16)
+                data_int = int(data_hex, 16)
+                print("Received msg id: ", id_int, " data: ", data_int)
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             # Connect to the server
             s.connect((self.server_address, self.server_port))
-            print("Connected to server at %s on port %s", self.server_address, self.server_port)
+            print(f"Connected to server at {self.server_address} on port {self.server_port}")
             
+            buffer = ''
             while True:
                 # Receive message from the server
                 data = s.recv(1024)
+                buffer += data.decode().replace('\n','')
+                
+                while ',' in buffer:
+                    # Find the position of the delimiter indicating the end of a message
+                    delimiter_position = buffer.find(',')
+                    # Extract the message up to the delimiter
+                    message = buffer[:delimiter_position]
+                    # Process the message
+                    process_message(message)
+                    # Remove the processed message from the buffer
+                    buffer = buffer[delimiter_position + len(','):]
            
     
     def simulate_telemetry(self, log_path: str):
