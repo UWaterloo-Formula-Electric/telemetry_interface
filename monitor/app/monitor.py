@@ -40,7 +40,7 @@ class Monitor:
                     buffer = buffer[delimiter_position + len(','):]
            
     
-    def _process_message(self, message: str):
+    def _process_message(self, message: str) -> tuple:
         if message[:2] != "0x":
             return 
         else:
@@ -52,18 +52,13 @@ class Monitor:
             id_int = int(id_hex, 16)
             data_int = int(data_hex, 16)
             print("Received msg id: ", id_int, " data: ", data_int)
+            return id_int, data_hex
     
-    def _process_can_message(self, message: str):
-        if message[:2] != "0x":
-            return 
-        
-        clean_hex = message[2:]
-        id_hex = clean_hex[:8]
-        data_hex = clean_hex[8:]
-        id_int = int(id_hex, 16)
+    def process_can_message(self, message: str):
+        can_id, can_data = self._process_message(message)
         # data_int = int(data_hex, 16)
-        msg = self.dbc.cantools_db.get_message_by_frame_id(id_int)
-        data_bytes = bytes.fromhex(data_hex)
+        msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
+        data_bytes = bytes.fromhex(can_data)
         decoded_signals = msg.decode(data_bytes)
 
         for signal_name, signal_value in decoded_signals.items():

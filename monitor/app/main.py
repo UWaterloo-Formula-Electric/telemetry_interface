@@ -12,5 +12,9 @@ if __name__ == '__main__':
         
     start.simulate_random()
     # start.read_tcp()
+    # tester = Monitor(TCP_HOST, TCP_PORT, DBC_PATH_NEW)
+
+    # tester.process_can_message("0x18C0040110C432AE32BB3200")
+
 
 
