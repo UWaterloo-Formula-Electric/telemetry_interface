@@ -29,8 +29,8 @@ To simplify the set up process, there has been Bash scripts created for your con
 - In the root folder of the repository, run `./scripts/start_dashboards.sh` in your terminal
 - You have two options:
 
-1. viewing the predefined Grafana dashboard
-2. selecting and viewing graphs of signals you choose in InfluxDB
+  1. viewing the predefined Grafana dashboard
+  2. selecting and viewing graphs of signals you choose in InfluxDB
 
 - For Grafana go to `localhost:3000`
 - For InfluxDB go to `localhost:8086`
