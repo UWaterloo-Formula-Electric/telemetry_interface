@@ -7,14 +7,14 @@ if __name__ == '__main__':
     start = Monitor(TCP_HOST, TCP_PORT, DBC_PATH_NEW)
 
     for i in range(3):
-        print("Buffer time...")
+        print("Buffer time to allow Influx and Grafana to start up...")
         time.sleep(1)
         
-    start.simulate_random()
-    # start.read_tcp()
-    # tester = Monitor(TCP_HOST, TCP_PORT, DBC_PATH_NEW)
-
+    # start.simulate_random()
+    # start.simulate_telemetry(LOG_PATH)
+    start.read_tcp()
+    # tester = Monitor('host.docker.internal', 12345, DBC_PATH_NEW)
+    # tester.read_tcp()
     # tester.process_can_message("0x18C0040110C432AE32BB3200")
-
 
 

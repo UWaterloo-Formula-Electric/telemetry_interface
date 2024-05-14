@@ -35,7 +35,7 @@ class Monitor:
                     # Extract the message up to the delimiter
                     message = buffer[:delimiter_position]
                     # Process the message
-                    self._process_message(message)
+                    self.process_can_message(message)
                     # Remove the processed message from the buffer
                     buffer = buffer[delimiter_position + len(','):]
            
@@ -62,7 +62,9 @@ class Monitor:
         decoded_signals = msg.decode(data_bytes)
 
         for signal_name, signal_value in decoded_signals.items():
-            print(f"{signal_name}: {signal_value}")
+            timestamp = datetime.now().timestamp()
+            signal = Signal(signal_name, signal_value, timestamp, self.dbc)
+            write_signal(signal)
 
 
     def simulate_telemetry(self, log_path: str):
@@ -120,6 +122,8 @@ class Monitor:
         while 1:
             for signal_name in self.dbc.lookup.keys():
                 random_val = random.randint(0, 1000)
+                if signal_name in ['CarStateIsLV', 'CarStateIsHV', 'CarStateIsEM']:
+                    random_val = random.choice([0, 1])
                 signal = Signal(signal_name, random_val, datetime.now().timestamp(), self.dbc)
                 write_signal(signal)
             time.sleep(0.2)

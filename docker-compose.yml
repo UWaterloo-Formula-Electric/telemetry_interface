@@ -19,6 +19,17 @@ services:
     build: ./monitor
     container_name: uwfe_monitor
     restart: always
+    # networks:
+    #   - tcp-network
+
+  # test-server:
+  #   build: ./test-server
+  #   container_name: uwfe_test_tcp_server
+  #   ports:
+  #     - "12345:12345"
+  #   restart: always
+  #   # networks:
+  #   #   - tcp-network
 
   influxdb:
     image: influxdb:2-alpine
@@ -39,3 +50,6 @@ services:
 volumes:
   influxdbv2:
   grafana-storage:
+# networks:
+#   tcp-network:
+#     driver: bridge
