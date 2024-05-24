@@ -21,7 +21,7 @@ def start_server(host='0.0.0.0', port=12345):
             try:
                 while True:
                     # Message to be sent
-                    message = b'0x18C0040110C432AE32BB3200,0x18C0040110C432AE32BB3200,0x18C0040110C432AE32BB3200,'
+                    message = b'AE32BB3200,0x18C0040110C432AE32BB3200,0x18C0040110C432AE32BB3200,'
                     # Send the message to the client
                     client_socket.sendall(message)
                     # Wait a bit before sending the next one

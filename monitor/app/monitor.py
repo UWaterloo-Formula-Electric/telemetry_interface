@@ -28,12 +28,16 @@ class Monitor:
                 # Receive message from the server
                 data = s.recv(1024)
                 buffer += data.decode().replace('\n','')
-                
+                print(buffer)
                 while ',' in buffer:
                     # Find the position of the delimiter indicating the end of a message
                     delimiter_position = buffer.find(',')
                     # Extract the message up to the delimiter
                     message = buffer[:delimiter_position]
+                    # Check it is well formed
+                    if message[:2] != "0x":
+                        buffer = buffer[delimiter_position + len(','):]
+                        continue
                     # Process the message
                     self.process_can_message(message)
                     # Remove the processed message from the buffer
