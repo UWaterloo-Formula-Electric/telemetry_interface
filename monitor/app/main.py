@@ -12,9 +12,9 @@ if __name__ == '__main__':
         
     # start.simulate_random()
     # start.simulate_telemetry(LOG_PATH)
-    # start.read_tcp()
-    tester = Monitor('host.docker.internal', 12345, DBC_PATH_NEW)
-    tester.read_tcp()
+    start.read_tcp()
+    # tester = Monitor('host.docker.internal', 12345, DBC_PATH_NEW)
+    # tester.read_tcp()
     # tester.process_can_message("0x18C0040110C432AE32BB3200")
 
 
