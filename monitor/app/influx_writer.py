@@ -1,4 +1,4 @@
-import influxdb_client, os, time
+import influxdb_client, os, datetime
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
 
@@ -31,9 +31,19 @@ def write_signal(signal: Signal):
         .tag("signal_name", signal.signal_name)\
         .field("value", float(signal.value)))
        # .time(signal.timestamp)
-
       write_api.write(bucket=bucket, org=INFLUX_ORG, record=point)
       print(signal)
     except Exception as e:
       print(e)
-        
+
+def write_dtc(code, severity, data, msg):
+    try:
+      point = (Point("DTC")\
+        .tag("code", code)\
+        .tag("severity", severity)\
+        .tag("data", data)\
+        .field("msg", msg))
+      write_api.write(bucket=bucket, org=INFLUX_ORG, record=point)
+      print(f"{msg}: {code}, {severity}, {data}")
+    except Exception as e:
+      print(e)

@@ -8,7 +8,7 @@ import time
 import random
 from datetime import datetime
 from can_data import Signal, DBC
-from influx_writer import write_signal
+from influx_writer import write_signal, write_dtc
 
 class Monitor:
     def __init__(self, server_address: str, server_port: int, dbc_path: str):
@@ -59,16 +59,22 @@ class Monitor:
             return id_int, data_hex
     
     def process_can_message(self, message: str):
+        def is_dtc(msg_name: str) -> bool:
+            return 'DTC' in msg_name
+        
         can_id, can_data = self._process_message(message)
         # data_int = int(data_hex, 16)
         msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
         data_bytes = bytes.fromhex(can_data)
         decoded_signals = msg.decode(data_bytes)
 
-        for signal_name, signal_value in decoded_signals.items():
-            timestamp = datetime.now().timestamp()
-            signal = Signal(signal_name, signal_value, timestamp, self.dbc)
-            write_signal(signal)
+        if is_dtc(msg.name):
+            write_dtc(decoded_signals['DTC_CODE'], decoded_signals['DTC_Severity'], decoded_signals['DTC_Data'], msg.name)
+        else:
+            for signal_name, signal_value in decoded_signals.items():
+                timestamp = datetime.now().timestamp()
+                signal = Signal(signal_name, signal_value, timestamp, self.dbc)
+                write_signal(signal)
 
 
     def simulate_telemetry(self, log_path: str):
@@ -124,10 +130,13 @@ class Monitor:
     def simulate_random(self):
         """Test method to simulate random telemetry data"""
         while 1:
-            for signal_name in self.dbc.lookup.keys():
-                random_val = random.randint(0, 1000)
-                if signal_name in ['CarStateIsLV', 'CarStateIsHV', 'CarStateIsEM']:
-                    random_val = random.choice([0, 1])
-                signal = Signal(signal_name, random_val, datetime.now().timestamp(), self.dbc)
-                write_signal(signal)
-            time.sleep(0.2)
+            for frame in self.dbc.dbc.frames:
+                if frame.name == 'VECTOR__INDEPENDENT_SIG_MSG':
+                    continue
+                if 'DTC' in frame.name:
+                    write_dtc(2, 1, 0, 'PDU_DTC')
+                else:
+                    pass
+                time.sleep(0.1)
+                    # for signal in frame.signals:
+                    #     write_signal(Signal(signal.name, random.randint(0, 100), datetime.now().timestamp(), self.dbc))

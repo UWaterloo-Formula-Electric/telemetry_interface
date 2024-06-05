@@ -20,6 +20,11 @@ class DBC:
     def _create_lookup(self):
         lookup = {}
         for message in self.dbc:
+            # if message.name == 'VECTOR__INDEPENDENT_SIG_MSG':
+            #     continue
+            # if 'DTC' in message.name:
+            #    continue
+
             for signal in message.signals:
                 signal_info = {
                     "msg_id": message.arbitration_id.id,
@@ -49,8 +54,7 @@ class Signal:
         return f"{self.timestamp:.6f}, [{self.msg_name}] {self.signal_name}, {self.value} - from {self.sender} to {self.receivers}"
 
     def __repr__(self):
-        return str(self)
-
+        return str(self)    
 
 def is_dtc(id: int) -> bool:        
     priority_mask = 0b111 << 26

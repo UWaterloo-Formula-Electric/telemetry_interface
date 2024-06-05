@@ -25,49 +25,22 @@
         "type": "influxdb",
         "uid": "P951FEA4DE68E13C5"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-YlRd"
-          },
-          "mappings": [],
-          "noValue": "No DTCs :)",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
       "gridPos": {
         "h": 7,
-        "w": 4,
+        "w": 8,
         "x": 0,
         "y": 0
       },
       "id": 3,
       "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
       },
       "pluginVersion": "10.4.2",
       "targets": [
@@ -76,12 +49,12 @@
             "type": "influxdb",
             "uid": "P951FEA4DE68E13C5"
           },
-          "query": "from(bucket: \"telemetry\")\r\n  |> range(start: -1h) // Adjust the time range as needed\r\n  |> filter(fn: (r) => \r\n      r[\"signal_name\"] == \"DTC_CODE\"\r\n    )\r\n  |> count()",
+          "query": "from(bucket: \"telemetry\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"DTC\")",
           "refId": "A"
         }
       ],
       "title": "DTC's Received",
-      "type": "stat"
+      "type": "logs"
     },
     {
       "datasource": {
@@ -116,7 +89,7 @@
       "gridPos": {
         "h": 7,
         "w": 6,
-        "x": 4,
+        "x": 8,
         "y": 0
       },
       "id": 7,
@@ -133,7 +106,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -224,8 +197,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 14,
-        "x": 10,
+        "w": 10,
+        "x": 14,
         "y": 0
       },
       "id": 17,
@@ -240,6 +213,7 @@
         "rowHeight": 0.9,
         "showValue": "auto",
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -321,7 +295,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -421,7 +395,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -522,7 +496,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -611,7 +585,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -731,6 +705,7 @@
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -819,7 +794,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.4.2",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -926,6 +901,7 @@
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "single",
           "sort": "none"
         }
@@ -1001,8 +977,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1121,8 +1096,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -1222,6 +1196,7 @@
     "from": "now-5m",
     "to": "now"
   },
+  "timeRangeUpdatedDuringEditOrView": false,
   "timepicker": {
     "refresh_intervals": ["1s"]
   },
