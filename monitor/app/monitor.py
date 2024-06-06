@@ -1,11 +1,6 @@
-"""
-Read on the TCP server for data
-"""
-
 import socket
 import json
 import time
-import random
 from datetime import datetime
 from can_data import Signal, DBC
 from influx_writer import write_signal, write_dtc
@@ -35,7 +30,7 @@ class Monitor:
                     # Extract the message up to the delimiter
                     message = buffer[:delimiter_position]
                     # Check it is well formed
-                    if message[:2] != "0x":
+                    if 'x' not in message or len(message.split('x')) != 2:
                         buffer = buffer[delimiter_position + len(','):]
                         continue
                     # Process the message
@@ -45,25 +40,27 @@ class Monitor:
            
     
     def _process_message(self, message: str) -> tuple:
-        if message[:2] != "0x":
+        if 'x' not in message or len(message.split('x')) != 2:
             return 
         else:
-            clean_hex = message[2:]
+            timestamp = message[:8]
+            clean_hex = message[9:]
 
             id_hex = clean_hex[:8]
             data_hex = clean_hex[8:]
 
             id_int = int(id_hex, 16)
             data_int = int(data_hex, 16)
-            print("Received msg id: ", id_int, " data: ", data_int)
-            return id_int, data_hex
+            print("Received msg id: ", id_int, " data: ", data_int, " timestamp: ", timestamp)
+            return id_int, data_hex, timestamp
     
     def process_can_message(self, message: str):
         def is_dtc(msg_name: str) -> bool:
             return 'DTC' in msg_name
         
-        can_id, can_data = self._process_message(message)
-        # data_int = int(data_hex, 16)
+        can_id, can_data, timestamp = self._process_message(message)
+        if can_id is None:
+            return
         msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
         data_bytes = bytes.fromhex(can_data)
         decoded_signals = msg.decode(data_bytes)
@@ -140,3 +137,7 @@ class Monitor:
                 time.sleep(0.1)
                     # for signal in frame.signals:
                     #     write_signal(Signal(signal.name, random.randint(0, 100), datetime.now().timestamp(), self.dbc))
+
+if __name__ == '__main__':
+    monitor = Monitor('localhost', 12345, 'path_to_dbc_file.dbc')
+    monitor.read_tcp()
