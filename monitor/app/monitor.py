@@ -27,7 +27,7 @@ class Monitor:
             while True:
                 # Receive message from the server
                 data = s.recv(1024)
-                buffer += data.decode()#.replace('\n','')
+                buffer += data.decode()
                 print(buffer)
                 while '\n' in buffer:
                     # Find the position of the delimiter indicating the end of a message

@@ -8,6 +8,6 @@ docker volume rm $(docker volume ls -q)
 
 docker compose build 
 
-docker-compose up influxdb -d
-docker-compose up test-server -d
+docker-compose up -d influxdb
+docker-compose up -d test-server
 docker-compose up monitor
