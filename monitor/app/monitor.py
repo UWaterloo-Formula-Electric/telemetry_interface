@@ -63,7 +63,6 @@ class Monitor:
             return 'DTC' in msg_name
         
         can_id, can_data = self._process_message(message)
-        # data_int = int(data_hex, 16)
         msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
         data_bytes = bytes.fromhex(can_data)
         decoded_signals = msg.decode(data_bytes)
