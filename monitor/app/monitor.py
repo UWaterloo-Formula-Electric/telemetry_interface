@@ -27,31 +27,31 @@ class Monitor:
             while True:
                 # Receive message from the server
                 data = s.recv(1024)
-                buffer += data.decode().replace('\n','')
+                buffer += data.decode()#.replace('\n','')
                 print(buffer)
-                while ',' in buffer:
+                while '\n' in buffer:
                     # Find the position of the delimiter indicating the end of a message
-                    delimiter_position = buffer.find(',')
+                    delimiter_position = buffer.find('\n')
                     # Extract the message up to the delimiter
                     message = buffer[:delimiter_position]
                     # Check it is well formed
-                    if message[:2] != "0x":
-                        buffer = buffer[delimiter_position + len(','):]
+                    if message[8] != "x":
+                        buffer = buffer[delimiter_position + len('\n'):]
                         continue
                     # Process the message
                     self.process_can_message(message)
                     # Remove the processed message from the buffer
-                    buffer = buffer[delimiter_position + len(','):]
+                    buffer = buffer[delimiter_position + len('\n'):]
            
     
     def _process_message(self, message: str) -> tuple:
-        if message[:2] != "0x":
+        if message[8] != "x":
             return 
         else:
             clean_hex = message[2:]
 
-            id_hex = clean_hex[:8]
-            data_hex = clean_hex[8:]
+            id_hex = message[9:17]
+            data_hex = message[17:33]
 
             id_int = int(id_hex, 16)
             data_int = int(data_hex, 16)
