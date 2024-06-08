@@ -1034,7 +1034,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 68
+            "y": 76
           },
           "id": 2,
           "options": {
@@ -1166,7 +1166,7 @@
             "h": 9,
             "w": 24,
             "x": 0,
-            "y": 77
+            "y": 85
           },
           "id": 10,
           "options": {
@@ -1447,6 +1447,165 @@
         }
       ],
       "title": "Inverter Coolant Derating",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P951FEA4DE68E13C5"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "1": {
+                  "index": 0,
+                  "text": "Motor Over-Speed Fault"
+                },
+                "2": {
+                  "index": 1,
+                  "text": "Over-current fault"
+                },
+                "4": {
+                  "index": 2,
+                  "text": "Over-voltage fault"
+                },
+                "8": {
+                  "index": 3,
+                  "text": "Over-temperature fault"
+                },
+                "16": {
+                  "index": 4,
+                  "text": "Accelerator Input Shorted"
+                },
+                "32": {
+                  "index": 5,
+                  "text": "Accelerator Input Open"
+                },
+                "64": {
+                  "index": 6,
+                  "text": "Direction Command Fault"
+                },
+                "128": {
+                  "index": 7,
+                  "text": "Response Timeout"
+                },
+                "256": {
+                  "index": 8,
+                  "text": "Hardware Gate Desaturation"
+                },
+                "512": {
+                  "index": 9,
+                  "text": "HW Over-current"
+                },
+                "1024": {
+                  "index": 10,
+                  "text": "Under-voltage"
+                },
+                "2048": {
+                  "index": 11,
+                  "text": "CAN Command Message Lost"
+                },
+                "4096": {
+                  "index": 12,
+                  "text": "Motor Over-temperature"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 9,
+        "x": 12,
+        "y": 25
+      },
+      "id": 28,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"signal_name\"] == \"INV_Run_Fault_Hi\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "HIGH"
+        },
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "P951FEA4DE68E13C5"
+          },
+          "hide": false,
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"signal_name\"] == \"INV_Run_Fault_Lo\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "LOW"
+        },
+        {
+          "datasource": {
+            "name": "Expression",
+            "type": "__expr__",
+            "uid": "__expr__"
+          },
+          "expression": "$HIGH * 65536",
+          "hide": false,
+          "refId": "HIGH_HI",
+          "type": "math"
+        }
+      ],
+      "title": "Inverter Run Fault",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "alias": "HIGH_LOW_COMBINED",
+            "binary": {
+              "left": "HIGH_HI",
+              "right": "LOW"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            },
+            "replaceFields": true
+          }
+        }
+      ],
       "type": "stat"
     },
     {
