@@ -41,7 +41,7 @@ class Monitor:
     
     def _process_message(self, message: str) -> tuple:
         if 'x' not in message or len(message.split('x')) != 2:
-            return 
+            return None, None, None
         else:
             timestamp = message[:8]
             clean_hex = message[9:]
@@ -61,7 +61,16 @@ class Monitor:
         can_id, can_data, timestamp = self._process_message(message)
         if can_id is None:
             return
-        msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
+        if can_id == 218103553:
+            print(f"Skipping message with frame ID: {can_id}")
+            return
+
+        try:
+            msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
+        except KeyError:
+            print(f"Frame ID {can_id} not found in DBC file")
+            return
+
         data_bytes = bytes.fromhex(can_data)
         decoded_signals = msg.decode(data_bytes)
 

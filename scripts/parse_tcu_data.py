@@ -26,7 +26,14 @@ def run_script(args):
                         skipped_file.write(line)
                         continue
                     timestamp, can_id, can_data = process_message(line.strip())
-                    msg = db.get_message_by_frame_id(can_id)
+                    if can_id == 218103553:
+                        skipped_file.write(line)
+                        continue
+                    try:
+                        msg = db.get_message_by_frame_id(can_id)
+                    except KeyError:
+                        skipped_file.write(line)
+                        continue
                     data_bytes = bytes.fromhex(can_data)
                     decoded_signals = msg.decode(data_bytes)
                     for signal in decoded_signals:
