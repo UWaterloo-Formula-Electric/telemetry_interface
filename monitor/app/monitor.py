@@ -95,11 +95,11 @@ class Monitor:
 
         with open(log_path, 'r') as file:
             for line in file:
-                parts = line.strip().split(',')
+                parts = line.strip().replace(' ','').split(',')
                 timestamp_str, signal_name = parts[:2]
                 value = ','.join(parts[2:])
 
-                original_timestamp = float(timestamp_str)
+                original_timestamp = int(timestamp_str, 16)
 
                 if initial_timestamp_log is None:
                     initial_timestamp_log = original_timestamp
