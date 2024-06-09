@@ -54,3 +54,4 @@ Steps
 1. Put the log file in /data
 2. Edit `config.py` to have LOG_PATH be the path to the file you want to read
 3. Uncomment / comment the right function in main.py (there is comments there explaining)
+4. Maybe increase line 105 in monitor.py to speed up log replay speed

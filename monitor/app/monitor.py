@@ -101,6 +101,9 @@ class Monitor:
 
                 original_timestamp = int(timestamp_str, 16)
 
+                # increase above 100 to speed up logs
+                original_timestamp /= 100
+
                 if initial_timestamp_log is None:
                     initial_timestamp_log = original_timestamp
 
