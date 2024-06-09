@@ -46,3 +46,11 @@ To simplify the set up process, there has been Bash scripts created for your con
 
 - After logging into InfluxDB, click on `Data Explorer` on the left side. Here you can look up individual signals and their time-series graph. You can filter by either the CAN message (default), by the signal name, or by the sender of the message
 - Side note: You will need to periodically hit submit, it doesn't auto-refresh like Grafana does
+
+#### Replaying Logs
+
+Steps
+
+1. Put the log file in /data
+2. Edit `config.py` to have LOG_PATH be the path to the file you want to read
+3. Uncomment / comment the right function in main.py (there is comments there explaining)
