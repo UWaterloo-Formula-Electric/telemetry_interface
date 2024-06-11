@@ -1,11 +1,6 @@
-"""
-Read on the TCP server for data
-"""
-
 import socket
 import json
 import time
-import random
 from datetime import datetime
 from can_data import Signal, DBC
 from influx_writer import write_signal, write_dtc
@@ -27,43 +22,55 @@ class Monitor:
             while True:
                 # Receive message from the server
                 data = s.recv(1024)
-                buffer += data.decode()
+                buffer += data.decode().replace('\n','')
                 print(buffer)
-                while '\n' in buffer:
+                while ',' in buffer:
                     # Find the position of the delimiter indicating the end of a message
-                    delimiter_position = buffer.find('\n')
+                    delimiter_position = buffer.find(',')
                     # Extract the message up to the delimiter
                     message = buffer[:delimiter_position]
                     # Check it is well formed
-                    if message[8] != "x":
-                        buffer = buffer[delimiter_position + len('\n'):]
+                    if 'x' not in message or len(message.split('x')) != 2:
+                        buffer = buffer[delimiter_position + len(','):]
                         continue
                     # Process the message
                     self.process_can_message(message)
                     # Remove the processed message from the buffer
-                    buffer = buffer[delimiter_position + len('\n'):]
+                    buffer = buffer[delimiter_position + len(','):]
            
     
     def _process_message(self, message: str) -> tuple:
-        if message[8] != "x":
-            return 
+        if 'x' not in message or len(message.split('x')) != 2:
+            return None, None, None
         else:
-            clean_hex = message[2:]
+            timestamp = message[:8]
+            clean_hex = message[9:]
 
-            id_hex = message[9:17]
-            data_hex = message[17:33]
+            id_hex = clean_hex[:8]
+            data_hex = clean_hex[8:]
 
             id_int = int(id_hex, 16)
             data_int = int(data_hex, 16)
-            print("Received msg id: ", id_int, " data: ", data_int)
-            return id_int, data_hex
+            print("Received msg id: ", id_int, " data: ", data_int, " timestamp: ", timestamp)
+            return id_int, data_hex, timestamp
     
     def process_can_message(self, message: str):
         def is_dtc(msg_name: str) -> bool:
             return 'DTC' in msg_name
         
-        can_id, can_data = self._process_message(message)
-        msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
+        can_id, can_data, timestamp = self._process_message(message)
+        if can_id is None:
+            return
+        if can_id == 218103553:
+            print(f"Skipping message with frame ID: {can_id}")
+            return
+
+        try:
+            msg = self.dbc.cantools_db.get_message_by_frame_id(can_id)
+        except KeyError:
+            print(f"Frame ID {can_id} not found in DBC file")
+            return
+
         data_bytes = bytes.fromhex(can_data)
         decoded_signals = msg.decode(data_bytes)
 
@@ -95,14 +102,11 @@ class Monitor:
 
         with open(log_path, 'r') as file:
             for line in file:
-                parts = line.strip().replace(' ','').split(',')
+                parts = line.strip().split(',')
                 timestamp_str, signal_name = parts[:2]
                 value = ','.join(parts[2:])
 
-                original_timestamp = int(timestamp_str, 16)
-
-                # increase above 100 to speed up logs
-                original_timestamp /= 100
+                original_timestamp = float(timestamp_str)
 
                 if initial_timestamp_log is None:
                     initial_timestamp_log = original_timestamp
@@ -142,3 +146,7 @@ class Monitor:
                 time.sleep(0.1)
                     # for signal in frame.signals:
                     #     write_signal(Signal(signal.name, random.randint(0, 100), datetime.now().timestamp(), self.dbc))
+
+if __name__ == '__main__':
+    monitor = Monitor('localhost', 12345, 'path_to_dbc_file.dbc')
+    monitor.read_tcp()

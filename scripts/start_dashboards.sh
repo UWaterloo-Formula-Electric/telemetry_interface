@@ -8,6 +8,6 @@
 
 docker compose build 
 
-docker-compose up -d influxdb
-docker-compose up -d grafana
+docker-compose up influxdb -d
+docker-compose up grafana -d
 docker-compose up monitor
